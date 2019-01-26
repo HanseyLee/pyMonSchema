@@ -2,15 +2,15 @@
 Another free MongoDB schema analyser based on [PyMongo](https://github.com/mongodb/mongo-python-driver) and [wxPython](https://github.com/wxWidgets/wxPython).
 Fast and Effective by using MongoDB MapReduce to analyse collection schema, simple yet powerful.
 
-Python 3
 Author: HanseyLee
-# Executive screeshot
-![examplePNG](static/examplePNG.PNG)
+#Screeshot
+![examplePNG](static/examplePNG.png)
 
 # Usage
+Using Python 3.
 ```bash
 $ pip install -r requirements.txt
-$ python pyMonSchema
+$ python pyMonSchema 
 ```
 Also, you can package it as a executive program using pyinstaller.
 
