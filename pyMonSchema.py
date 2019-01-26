@@ -1,9 +1,9 @@
-#!/bin/python
-import wx
+# -*- coding:utf-8 -*-
 import mongoDBM
 import logging
 import json
-import os 
+import os
+import wx
 # from bson.json_util import loads
 
 class PyMonSchemaFrame(wx.Frame):
@@ -111,8 +111,8 @@ class PyMonSchemaFrame(wx.Frame):
         Output.SetForegroundColour( wx.Colour( 0, 128, 255 ) )
         Output.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNHIGHLIGHT ) )
 
-        box.Add(uriText, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3) 
-        box.Add(self.mongo_uri_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)  
+        box.Add(uriText, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3)
+        box.Add(self.mongo_uri_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)
         box.Add(self.mongo_connect_button, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=8)
 
         box2 = wx.BoxSizer()
@@ -240,7 +240,7 @@ Save button -> save the result as a json file named databaseName_collectionName-
     def OnConnect(self, event):
         try:
             uri = self.mongo_uri_TextCtrl.GetValue()
-            self.dbm = mongo.DBManager(uri, '', '')
+            self.dbm = mongoDBM.DBManager(uri, '', '')
         except Exception:
             self.ReportMsg("Connnect MongoDB failed: {}.".format(uri), "Connect Fail")
         if self.dbm.client is not None:
@@ -313,7 +313,8 @@ Save button -> save the result as a json file named databaseName_collectionName-
             else:
                 embed = "no"
         except Exception as e:
-            self.ReportMsg("Get query, limit, omit_keys or omit_patterns failed！", "Get query, limit, omit_keys or omit_patterns failed！")
+            self.ReportMsg(u"Get query, limit, omit_keys or omit_patterns failed.",
+                           u"Get query, limit, omit_keys or omit_patterns failed.")
 
         # MapReduce 
         from bson.code import Code
@@ -439,6 +440,7 @@ Save button -> save the result as a json file named databaseName_collectionName-
 
 
 if __name__ == '__main__':
+
     # When this module is run (not imported) then create the app, the
     # frame, show it, and start the event loop.
     app = wx.App()
