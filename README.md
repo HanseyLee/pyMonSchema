@@ -3,7 +3,8 @@ Another free MongoDB schema analyser based on [PyMongo](https://github.com/mongo
 Fast and Effective by using MongoDB MapReduce to analyse collection schema, simple yet powerful.
 
 Author: HanseyLee
-#Screeshot
+
+# Screeshot
 ![examplePNG](static/examplePNG.png)
 
 # Usage
