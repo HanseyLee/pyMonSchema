@@ -11,7 +11,7 @@ Author: HanseyLee
 Using Python 3.
 ```bash
 $ pip install -r requirements.txt
-$ python pyMonSchema 
+$ python pyMonSchema.py 
 ```
 Also, you can package it as a executive program using pyinstaller.
 
@@ -25,18 +25,18 @@ Several required fields:
 ### Second:
 After connect and switch to specific collection, there are several optional fields before analyse schema.
 
-    - Query -> MongoDB query document to filter input to analyse. e.g. {"keyName": {"$in": ["key1", "key2"]}}, {"keyName": {"$exists": True}}(Note: PyMonSchema use Python Method "eval()" to deserialize query string, so use 'True'/'False' if query string contains bool value)
-    - Order -> Positive/Negative, used in sort document, order=Positive equivalent to sort("_id":1), order=Negative equivalent to sort("_id":-1).
-    - Limit -> Int, limit value of query result. Empty default is 0, which means no limit.
-    - Omit_keys -> Fields string to be omitted, sperate by comma. such as: keyName1, keyName2 .
-    - Omit_patterns -> Fileds match these regular expression patterns will be omitted, sperate by comma. such as: ^keyNameHead, keyNameTail$ .
-    - Embed-keys -> Whether to analyse embed-key (e.g. keyNameParent.keyNameChild1.keyNameChild2) or not.
-    - Analyse -> Run analyse.
+- Query -> MongoDB query document to filter input to analyse. e.g. {"keyName": {"$in": ["key1", "key2"]}}, {"keyName": {"$exists": True}}(Note: PyMonSchema use Python Method "eval()" to deserialize query string, so use 'True'/'False' if query string contains bool value)
+- Order -> Positive/Negative, used in sort document, order=Positive equivalent to sort("_id":1), order=Negative equivalent to sort("_id":-1).
+- Limit -> Int, limit value of query result. Empty default is 0, which means no limit.
+- Omit_keys -> Fields string to be omitted, sperate by comma. such as: keyName1, keyName2 .
+- Omit_patterns -> Fileds match these regular expression patterns will be omitted, sperate by comma. such as: ^keyNameHead, keyNameTail$ .
+- Embed-keys -> Whether to analyse embed-key (e.g. keyNameParent.keyNameChild1.keyNameChild2) or not.
+- Analyse -> Run analyse.
 
 ### Output:
 Display schema result.
 
-    - Save button -> save the result as a json file named databaseName_collectionName-Schema.json default. The output json file like this:
+- Save button -> save the result as a json file named databaseName_collectionName-Schema.json default. The output json file like this:
     ```json
     [
         {
