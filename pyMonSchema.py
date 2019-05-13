@@ -317,6 +317,11 @@ Save button -> save the result as a json file named databaseName_collectionName-
                            u"Get query, limit, omit_keys or omit_patterns failed.")
 
         # MapReduce 
+        # The mongo shell treats all numbers as 64-bit floating-point double values by default.
+        # The mongo shell provides the NumberInt() constructor to explicitly specify 32-bit integers.
+        # The mongo shell provides the NumberLong() wrapper to handle 64-bit integers.
+        # The mongo shell provides the NumberDecimal() constructor to explicitly specify 128-bit decimal-based floating-point values
+        # For NosqlBooster js shell, make integer n (n <= 2147483647 && n >= -2147483648) as Double automatically.
         from bson.code import Code
         mapper = Code('''
         function () {
@@ -344,7 +349,7 @@ Save button -> save the result as a json file named databaseName_collectionName-
                     } else {
                         compoundKey = prefix + '.' + i;
                     }                    
-                    var emitKey = [compoundKey, type];
+                    var emitKey = compoundKey + "##" + type;
                     emit(emitKey, 1);
 
                     if (EMBED === "yes") {
@@ -374,19 +379,26 @@ Save button -> save the result as a json file named databaseName_collectionName-
         limit = limit
         scope = {'OMIT_KEYS': omit_keys, 'OMIT_PATTERNS': omit_patterns, 'EMBED': embed}
         
-        rstJsonList = self.dbm.coll.inline_map_reduce(mapper, reducer, query=query, sort=sort, limit=limit, scope=scope)
+        coll_stat = self.dbm.db.command("collstats", self.dbm.coll_name)
+        if coll_stat.get("sharded") == False:
+            rstJsonList = self.dbm.coll.inline_map_reduce(mapper, reducer, query=query, sort=sort, limit=limit, scope=scope)
+        else:
+            rstJsonList = self.dbm.coll.inline_map_reduce(mapper, reducer, query=query, sort=sort, scope=scope)
+
         total = 1
         key_dict = {}
         for doc in rstJsonList:
-            key = doc['_id'][0]
-            type = doc['_id'][1]
+            id = doc['_id']
+            idArr = id.split("##")
+            key = idArr[0]
+            type = idArr[1]
             value = doc['value']
             if key == "_id":
                 total = value
             key_all = key_dict.get(key, None)
             if key_all is None:
                 key_dict[key] = {'key': key, 'total_occurrence': float(value),
-                                 'statics': [{'type': type, 'occurrence': value, 'percent': 0.0}]}
+                                'statics': [{'type': type, 'occurrence': value, 'percent': 0.0}]}
             else:
                 key_dict[key]['total_occurrence'] = float(key_all['total_occurrence']) + float(value)
                 key_dict[key]['statics'].append({'type': type, 'occurrence': value, 'percent': 0.0})
