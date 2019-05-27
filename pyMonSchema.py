@@ -1,9 +1,9 @@
-# -*- coding:utf-8 -*-
-import mongoDBM
+#!/bin/python
+import wx
+import mongo
 import logging
 import json
-import os
-import wx
+import os 
 # from bson.json_util import loads
 
 class PyMonSchemaFrame(wx.Frame):
@@ -38,6 +38,7 @@ class PyMonSchemaFrame(wx.Frame):
         self.omit_keys_TextCtrl = wx.TextCtrl(panel)
         self.omit_patterns_TextCtrl = wx.TextCtrl(panel)
         self.embed_CheckBox = wx.CheckBox(panel)
+        self.layer_TextCtrl = wx.TextCtrl(panel)
         self.analyse_button = wx.Button(panel, label=u"Analyse!")
         self.analyse_button.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVECAPTION ) )
         self.Bind(wx.EVT_BUTTON, self.OnSchemaAnalyser, self.analyse_button)
@@ -102,6 +103,7 @@ class PyMonSchemaFrame(wx.Frame):
         omit_keys = wx.StaticText(self.panel, label=u"Omit_keys:")
         omit_patterns = wx.StaticText(self.panel, label=u"Omit_patterns:")
         embed = wx.StaticText(self.panel, label=u"Embed-keys:")
+        layer = wx.StaticText(self.panel, label=u"Layer:")
 
         static_line_2 = wx.StaticLine(self.panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL)
 
@@ -111,8 +113,8 @@ class PyMonSchemaFrame(wx.Frame):
         Output.SetForegroundColour( wx.Colour( 0, 128, 255 ) )
         Output.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_BTNHIGHLIGHT ) )
 
-        box.Add(uriText, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3)
-        box.Add(self.mongo_uri_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)
+        box.Add(uriText, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3) 
+        box.Add(self.mongo_uri_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)  
         box.Add(self.mongo_connect_button, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=8)
 
         box2 = wx.BoxSizer()
@@ -135,7 +137,8 @@ class PyMonSchemaFrame(wx.Frame):
         box3.Add(self.omit_patterns_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5) 
         box3.Add(embed, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3)  
         box3.Add(self.embed_CheckBox, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5) 
-
+        box3.Add(layer, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3)  
+        box3.Add(self.layer_TextCtrl, proportion=1, flag=wx.EXPAND | wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5) 
 
         v_box = wx.BoxSizer(wx.VERTICAL) 
         v_box.Add(First, proportion=0, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=3) 
@@ -240,7 +243,7 @@ Save button -> save the result as a json file named databaseName_collectionName-
     def OnConnect(self, event):
         try:
             uri = self.mongo_uri_TextCtrl.GetValue()
-            self.dbm = mongoDBM.DBManager(uri, '', '')
+            self.dbm = mongo.DBManager(uri, '', '')
         except Exception:
             self.ReportMsg("Connnect MongoDB failed: {}.".format(uri), "Connect Fail")
         if self.dbm.client is not None:
@@ -312,9 +315,13 @@ Save button -> save the result as a json file named databaseName_collectionName-
                 embed = "yes"
             else:
                 embed = "no"
+            layer_str = self.layer_TextCtrl.GetValue()
+            if layer_str == "":
+                layer = 0
+            else:
+                layer = int(layer_str)
         except Exception as e:
-            self.ReportMsg(u"Get query, limit, omit_keys or omit_patterns failed.",
-                           u"Get query, limit, omit_keys or omit_patterns failed.")
+            self.ReportMsg("Get query, limit, omit_keys or omit_patterns failed！", "Get query, limit, omit_keys or omit_patterns failed！")
 
         # MapReduce 
         # The mongo shell treats all numbers as 64-bit floating-point double values by default.
@@ -354,7 +361,13 @@ Save button -> save the result as a json file named databaseName_collectionName-
 
                     if (EMBED === "yes") {
                         if (type === "BSON") {
-                            analyse(n, compoundKey);
+                            if (LAYER == 0) {
+                                analyse(n, compoundKey);
+                            } else {
+                                if (compoundKey.split(".").length < LAYER) {
+                                    analyse(n, compoundKey);                                
+                                }
+                            }
                         }
                     }
                 }
@@ -377,7 +390,7 @@ Save button -> save the result as a json file named databaseName_collectionName-
         query = query
         sort = {"_id": order}
         limit = limit
-        scope = {'OMIT_KEYS': omit_keys, 'OMIT_PATTERNS': omit_patterns, 'EMBED': embed}
+        scope = {'OMIT_KEYS': omit_keys, 'OMIT_PATTERNS': omit_patterns, 'EMBED': embed, 'LAYER': layer}
         
         coll_stat = self.dbm.db.command("collstats", self.dbm.coll_name)
         if coll_stat.get("sharded") == False:
@@ -452,7 +465,6 @@ Save button -> save the result as a json file named databaseName_collectionName-
 
 
 if __name__ == '__main__':
-
     # When this module is run (not imported) then create the app, the
     # frame, show it, and start the event loop.
     app = wx.App()
