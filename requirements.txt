@@ -1,4 +1,4 @@
 configparser==3.5.0
-pymongo==4.6.3
+pymongo==4.18.3
 wxpy==0.3.9.8
 wxPython==4.0.4
